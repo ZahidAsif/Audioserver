@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Audio Guide</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            text-align: center;
+            cursor: pointer;
+        }
+        .play-card {
+            background: #1e293b;
+            padding: 40px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 80%;
+        }
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        h2 { margin: 0 0 10px 0; }
+        p { color: #94a3b8; margin: 0; }
+    </style>
+</head>
+<body onclick="playAudio()">
+
+    <div class="play-card">
+        <div class="icon" id="status-icon">🔊</div>
+        <h2 id="status-title">Tap Anywhere to Listen</h2>
+        <p id="status-sub">QR AUDIO</p>
+    </div>
+
+    <!-- Replace 'campus_guide.mp3' with your audio path -->
+    <audio id="myAudio" src="audiofile.mp3" preload="auto"></audio>
+
+    <script>
+        const audio = document.getElementById('myAudio');
+
+        // Attempt automatic playback (works if the phone allows it)
+        window.addEventListener('load', () => {
+            audio.play().then(() => {
+                updateUI();
+            }).catch(() => {
+                // Autoplay blocked - user must tap
+                console.log("Autoplay blocked by browser. Awaiting user tap.");
+            });
+        });
+
+        // Triggered by tapping anywhere on the screen
+        function playAudio() {
+            if (audio.paused) {
+                audio.play();
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('status-icon').innerText = '🎶';
+            document.getElementById('status-title').innerText = 'Playing Audio...';
+            document.getElementById('status-sub').innerText = 'Touch screen to pause/resume';
+        }
+    </script>
+</body>
+</html>
