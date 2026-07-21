@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University Audio Guide</title>
+    <title>Audio</title>
     <style>
         body {
             margin: 0;
@@ -18,10 +18,12 @@
             font-family: system-ui, -apple-system, sans-serif;
             text-align: center;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .play-card {
             background: #1e293b;
-            padding: 40px 20px;
+            padding: 40px 30px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             max-width: 80%;
@@ -34,42 +36,56 @@
         p { color: #94a3b8; margin: 0; }
     </style>
 </head>
-<body onclick="playAudio()">
+<body onclick="toggleAudio()">
 
     <div class="play-card">
-        <div class="icon" id="status-icon">🔊</div>
+        <div class="icon" id="status-icon">▶️</div>
         <h2 id="status-title">Tap Anywhere to Listen</h2>
-        <p id="status-sub">QR AUDIO</p>
+        <p id="status-sub">Touch screen to play/pause</p>
     </div>
 
     <!-- Replace 'campus_guide.mp3' with your audio path -->
-    <audio id="myAudio" src="audiofile.mp3" preload="auto"></audio>
+    <audio id="myAudio" src="campus_guide.mp3" preload="auto"></audio>
 
     <script>
         const audio = document.getElementById('myAudio');
 
-        // Attempt automatic playback (works if the phone allows it)
+        // Attempt automatic playback if mobile browser permits
         window.addEventListener('load', () => {
             audio.play().then(() => {
-                updateUI();
+                updateUI(true);
             }).catch(() => {
-                // Autoplay blocked - user must tap
-                console.log("Autoplay blocked by browser. Awaiting user tap.");
+                console.log("Autoplay blocked. User tap required.");
             });
         });
 
-        // Triggered by tapping anywhere on the screen
-        function playAudio() {
+        // Toggle play/pause state on tap
+        function toggleAudio() {
             if (audio.paused) {
                 audio.play();
-                updateUI();
+                updateUI(true);
+            } else {
+                audio.pause();
+                updateUI(false);
             }
         }
 
-        function updateUI() {
-            document.getElementById('status-icon').innerText = '🎶';
-            document.getElementById('status-title').innerText = 'Playing Audio...';
-            document.getElementById('status-sub').innerText = 'Touch screen to pause/resume';
+        // Reset UI when audio finishes playing
+        audio.addEventListener('ended', () => {
+            updateUI(false);
+            document.getElementById('status-title').innerText = 'Tap Anywhere to Replay';
+        });
+
+        function updateUI(isPlaying) {
+            if (isPlaying) {
+                document.getElementById('status-icon').innerText = '⏸️';
+                document.getElementById('status-title').innerText = 'Playing Audio...';
+                document.getElementById('status-sub').innerText = 'Touch screen to pause';
+            } else {
+                document.getElementById('status-icon').innerText = '▶️';
+                document.getElementById('status-title').innerText = 'Paused';
+                document.getElementById('status-sub').innerText = 'Touch screen to resume';
+            }
         }
     </script>
 </body>
