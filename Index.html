@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio</title>
+    <title>Remote Trigger</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -17,75 +15,51 @@
             color: #ffffff;
             font-family: system-ui, -apple-system, sans-serif;
             text-align: center;
-            cursor: pointer;
             user-select: none;
-            -webkit-user-select: none;
         }
-        .play-card {
-            background: #1e293b;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            max-width: 80%;
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: background 0.2s;
         }
-        .icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-        h2 { margin: 0 0 10px 0; }
-        p { color: #94a3b8; margin: 0; }
+        .btn:active { background: #1d4ed8; }
+        #status { margin-top: 20px; color: #94a3b8; }
     </style>
 </head>
-<body onclick="toggleAudio()">
+<body>
 
-    <div class="play-card">
-        <div class="icon" id="status-icon">▶️</div>
-        <h2 id="status-title">Tap Anywhere to Listen</h2>
-        <p id="status-sub">Touch screen to play/pause</p>
+    <div>
+        <button class="btn" onclick="sendTrigger()">Trigger PC Script</button>
+        <p id="status">Tap button to send signal</p>
     </div>
 
-    <!-- Replace 'campus_guide.mp3' with your audio path -->
-    <audio id="myAudio" src="audiofile.mp3" preload="auto"></audio>
-
     <script>
-        const audio = document.getElementById('myAudio');
+        // Replace with your Webhook.site URL
+        const WEBHOOK_URL = "https://webhook.site/7f6b5738-7a25-41d9-91c0-8c9ad600dc65";
 
-        // Attempt automatic playback if mobile browser permits
-        window.addEventListener('load', () => {
-            audio.play().then(() => {
-                updateUI(true);
-            }).catch(() => {
-                console.log("Autoplay blocked. User tap required.");
+        function sendTrigger() {
+            const status = document.getElementById('status');
+            status.innerText = "Sending signal...";
+
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: "run_vbs", timestamp: Date.now() })
+            })
+            .then(response => {
+                status.innerText = "Signal sent to PC!";
+                setTimeout(() => status.innerText = "Tap button to send signal", 3000);
+            })
+            .catch(error => {
+                status.innerText = "Error sending signal.";
+                console.error(error);
             });
-        });
-
-        // Toggle play/pause state on tap
-        function toggleAudio() {
-            if (audio.paused) {
-                audio.play();
-                updateUI(true);
-            } else {
-                audio.pause();
-                updateUI(false);
-            }
-        }
-
-        // Reset UI when audio finishes playing
-        audio.addEventListener('ended', () => {
-            updateUI(false);
-            document.getElementById('status-title').innerText = 'Tap Anywhere to Replay';
-        });
-
-        function updateUI(isPlaying) {
-            if (isPlaying) {
-                document.getElementById('status-icon').innerText = '⏸️';
-                document.getElementById('status-title').innerText = 'Playing Audio...';
-                document.getElementById('status-sub').innerText = 'Touch screen to pause';
-            } else {
-                document.getElementById('status-icon').innerText = '▶️';
-                document.getElementById('status-title').innerText = 'Paused';
-                document.getElementById('status-sub').innerText = 'Touch screen to resume';
-            }
         }
     </script>
 </body>
