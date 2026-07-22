@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Claims...</title>
+    <title>Remote Trigger & Dashboard</title>
     <style>
         body {
             margin: 0;
@@ -70,21 +70,31 @@
     </div>
     
     <script>
-        const WEBHOOK_URL = "https://webhook.site/a59a2065-9189-4520-ba63-413d36c05a54";
-    
+        // Insert your NEW classic token below
+        const GITHUB_TOKEN = "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";
+        const GITHUB_USER  = "ZahidAsif";
+        const REPO_NAME    = "agico";
+
         function sendTrigger() {
             const status = document.getElementById('status');
             status.innerText = "Working on it...";
-    
-            fetch(WEBHOOK_URL, {
+
+            fetch(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/dispatches`, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({ action: "run_vbs", timestamp: Date.now() })
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ event_type: "run_vbs_trigger" })
             })
-            .then(() => {
-                status.innerText = "Done!";
-                setTimeout(() => status.innerText = "", 3000);
+            .then(response => {
+                if (response.ok) {
+                    status.innerText = "Done!";
+                    setTimeout(() => status.innerText = "", 3000);
+                } else {
+                    status.innerText = "Error Occurred.";
+                }
             })
             .catch(error => {
                 status.innerText = "Error Occurred.";
