@@ -221,7 +221,7 @@
 
         <div class="status-container">
             <div id="dot" class="status-dot"></div>
-            <span id="status">Ready, when you are</span>
+            <span id="status"></span>
         </div>
     </div>
 
@@ -237,7 +237,7 @@
             const status = document.getElementById('status');
             const dot = document.getElementById('dot');
             
-            status.innerText = "Triggering pipeline...";
+            status.innerText = "Initiating command...";
             dot.classList.add('active');
 
             try {
@@ -270,9 +270,9 @@
                 });
 
                 if (putRes.ok) {
-                    status.innerText = "Trigger Sent Successfully!";
+                    status.innerText = "Upload Command Sent!";
                     setTimeout(() => {
-                        status.innerText = "System Ready";
+                        status.innerText = "";
                         dot.classList.remove('active');
                     }, 3000);
                 } else {
