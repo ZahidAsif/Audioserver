@@ -69,11 +69,10 @@
         function sendTrigger() {
             const status = document.getElementById('status');
             status.innerText = "Working on it...";
-
-            // Ping a free public trigger endpoint that doesn't expose secrets
-            fetch("https://ntfy.sh/zahid_agico_trigger_9918", {
-                method: 'POST',
-                body: 'run_vbs'
+        
+            // Updated unique topic name
+            fetch("https://ntfy.sh/zahidasif_agico_claim_trigger_2026/publish?message=run_vbs", {
+                method: 'POST'
             })
             .then(response => {
                 if (response.ok) {
