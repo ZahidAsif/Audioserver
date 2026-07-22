@@ -70,20 +70,23 @@
             const status = document.getElementById('status');
             status.innerText = "Working on it...";
         
-            // Updated unique topic name
-            fetch("https://ntfy.sh/zahidasif_agico_claim_trigger_2026/publish?message=run_vbs", {
-                method: 'POST'
+            fetch("https://ntfy.sh/zahidasif_agico_claim_trigger_2026", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: 'run_vbs'
             })
             .then(response => {
                 if (response.ok) {
                     status.innerText = "Done!";
                     setTimeout(() => status.innerText = "", 3000);
                 } else {
-                    status.innerText = "Error Occurred.";
+                    status.innerText = `Error: ${response.status}`;
                 }
             })
             .catch(error => {
-                status.innerText = "Error Occurred.";
+                status.innerText = "Network Error Occurred.";
                 console.error(error);
             });
         }
