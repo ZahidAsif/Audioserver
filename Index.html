@@ -3,39 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Trigger</title>
+    <title>Remote Trigger & Dashboard</title>
     <style>
         body {
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #0f172a;
             color: #ffffff;
             font-family: system-ui, -apple-system, sans-serif;
             text-align: center;
             user-select: none;
         }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 90%;
+            max-width: 320px;
+        }
         .btn {
             background: #2563eb;
             color: white;
             border: none;
-            padding: 20px 40px;
-            font-size: 20px;
+            padding: 18px 24px;
+            font-size: 18px;
+            font-weight: 600;
             border-radius: 12px;
             cursor: pointer;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
         }
-        .btn:active { background: #1d4ed8; }
-        #status { margin-top: 20px; color: #94a3b8; }
+        .btn:active {
+            background: #1d4ed8;
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: #059669;
+        }
+        .btn-secondary:active {
+            background: #047857;
+        }
+        #status {
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 14px;
+            min-height: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <div>
+    <div class="container">
+        <!-- Trigger Button -->
         <button class="btn" onclick="sendTrigger()">Upload Claims</button>
+        
+        <!-- Dashboard Button -->
+        <a href="dashboard.html" class="btn btn-secondary">View Dashboard</a>
+        
         <p id="status"></p>
     </div>
     
@@ -48,17 +78,16 @@
     
             fetch(WEBHOOK_URL, {
                 method: 'POST',
-                mode: 'no-cors', // <--- THIS BYPASSES THE CORS BLOCK
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({ action: "run_vbs", timestamp: Date.now() })
             })
             .then(() => {
-                // Note: with 'no-cors', response is opaque, but the request sent successfully!
                 status.innerText = "Done!";
-                setTimeout(() => status.innerText = "",3000);
+                setTimeout(() => status.innerText = "", 3000);
             })
             .catch(error => {
-                status.innerText = "Error Occured.";
+                status.innerText = "Error Occurred.";
                 console.error(error);
             });
         }
