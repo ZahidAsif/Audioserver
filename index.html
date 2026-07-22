@@ -81,6 +81,8 @@
                 if (response.ok) {
                     status.innerText = "Done!";
                     setTimeout(() => status.innerText = "", 3000);
+                } else if (response.status === 429) {
+                    status.innerText = "Rate limited. Wait 1 min.";
                 } else {
                     status.innerText = `Error: ${response.status}`;
                 }
