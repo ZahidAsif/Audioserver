@@ -204,6 +204,7 @@
             height: 8px;
             border-radius: 50%;
             transition: all 0.4s ease;
+            background-color: #64748b;
         }
 
         /* Online Status: Breathing Green Glow */
@@ -217,6 +218,13 @@
         .status-dot.offline {
             background-color: #ef4444;
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+            animation: none;
+        }
+
+        /* Checking Status: Muted Yellow Glow */
+        .status-dot.checking {
+            background-color: #f59e0b;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
             animation: none;
         }
 
@@ -399,8 +407,8 @@
         </div>
 
         <div class="status-container">
-            <div id="dot" class="status-dot online"></div>
-            <span id="status">System Ready</span>
+            <div id="dot" class="status-dot checking"></div>
+            <span id="status">Checking network...</span>
         </div>
     </div>
 
@@ -435,12 +443,39 @@
         // EMBEDDED ENCRYPTED PAYLOAD
         const ENCRYPTED_DATA = {"salt":[94,138,116,195,165,236,41,90,211,230,251,53,38,45,115,214],"iv":[124,103,194,137,148,158,223,126,203,235,18,27],"ciphertext":[3,187,132,156,248,165,138,237,221,106,54,6,76,3,85,171,143,98,244,224,242,130,104,35,116,116,228,104,132,85,118,161,173,5,46,81,64,225,144,130,213,104,0,4,122,255,68,161,2,149,215,104,89,213,34,245]};
 
-        // Network Status Detector
-        function updateConnectionStatus() {
+        let isActionInProgress = false;
+
+        // Active GitHub Reachability Ping
+        async function verifyGitHubAccess() {
+            if (!navigator.onLine) return false;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 sec timeout
+
+            try {
+                const res = await fetch(`https://api.github.com/zen?_=${Date.now()}`, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return res.ok;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        async function updateConnectionStatus() {
+            if (isActionInProgress) return;
+
             const dot = document.getElementById('dot');
             const statusText = document.getElementById('status');
 
-            if (navigator.onLine) {
+            const hasAccess = await verifyGitHubAccess();
+
+            if (isActionInProgress) return; // Prevent overwriting upload status
+
+            if (hasAccess) {
                 dot.className = 'status-dot online';
                 statusText.innerText = "System Ready";
             } else {
@@ -449,6 +484,8 @@
             }
         }
 
+        // Periodically verify real connection every 5 seconds
+        setInterval(updateConnectionStatus, 5000);
         window.addEventListener('online', updateConnectionStatus);
         window.addEventListener('offline', updateConnectionStatus);
         updateConnectionStatus();
@@ -482,7 +519,10 @@
             if (!pin) return;
 
             const status = document.getElementById('status');
+            const dot = document.getElementById('dot');
 
+            isActionInProgress = true;
+            dot.className = 'status-dot checking';
             status.innerText = "Authenticating...";
 
             const decryptedToken = await decryptToken(pin);
@@ -490,7 +530,11 @@
             if (!decryptedToken) {
                 alert("Incorrect Security PIN, Sir.");
                 status.innerText = "Access Denied";
-                setTimeout(updateConnectionStatus, 3000);
+                dot.className = 'status-dot offline';
+                setTimeout(() => {
+                    isActionInProgress = false;
+                    updateConnectionStatus();
+                }, 3000);
                 return;
             }
 
@@ -521,6 +565,7 @@
 
         async function sendTrigger(token) {
             const status = document.getElementById('status');
+            const dot = document.getElementById('dot');
 
             status.innerText = "Initiating command...";
 
@@ -556,15 +601,27 @@
 
                 if (putRes.ok) {
                     status.innerText = "Upload Command Sent!";
-                    setTimeout(updateConnectionStatus, 3000);
+                    dot.className = 'status-dot online';
+                    setTimeout(() => {
+                        isActionInProgress = false;
+                        updateConnectionStatus();
+                    }, 3000);
                 } else {
                     const err = await putRes.json().catch(() => ({}));
                     status.innerText = `Error: ${err.message || 'Unauthorized'}`;
-                    setTimeout(updateConnectionStatus, 3000);
+                    dot.className = 'status-dot offline';
+                    setTimeout(() => {
+                        isActionInProgress = false;
+                        updateConnectionStatus();
+                    }, 3000);
                 }
             } catch (error) {
                 status.innerText = "Network Connection Error";
-                setTimeout(updateConnectionStatus, 3000);
+                dot.className = 'status-dot offline';
+                setTimeout(() => {
+                    isActionInProgress = false;
+                    updateConnectionStatus();
+                }, 3000);
             }
         }
     </script>
