@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRPS Upload</title>
+    
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="agicologo.png">
+
+    <!-- Mobile Fullscreen / Web App Manifest Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#090d16">
+
     <style>
         * {
             box-sizing: border-box;
@@ -190,23 +198,45 @@
             min-height: 20px;
         }
 
+        /* Status Indicator Dot */
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #64748b;
-            transition: background-color 0.3s;
+            transition: all 0.4s ease;
         }
 
-        .status-dot.active {
-            background-color: #3b82f6;
-            box-shadow: 0 0 10px #3b82f6;
-            animation: blink 1s infinite alternate;
+        /* Online Status: Breathing Green Glow */
+        .status-dot.online {
+            background-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+            animation: breathe 2.5s ease-in-out infinite;
         }
 
-        @keyframes blink {
-            from { opacity: 0.4; }
-            to { opacity: 1; }
+        /* Offline Status: Solid Red Alert */
+        .status-dot.offline {
+            background-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+            animation: none;
+        }
+
+        /* Smooth Breathing Keyframe Animation */
+        @keyframes breathe {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.5;
+                box-shadow: 0 0 4px rgba(16, 185, 129, 0.3);
+            }
+            50% {
+                transform: scale(1.25);
+                opacity: 1;
+                box-shadow: 0 0 12px rgba(16, 185, 129, 0.9);
+            }
+            100% {
+                transform: scale(0.9);
+                opacity: 0.5;
+                box-shadow: 0 0 4px rgba(16, 185, 129, 0.3);
+            }
         }
 
         /* Masked Password Modal Overlay */
@@ -294,6 +324,52 @@
             background: rgba(255, 255, 255, 0.08);
             color: #94a3b8;
         }
+
+        /* Fixed Bottom-Right Fullscreen Floating Button */
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Hide exit icon by default */
+        .fullscreen-btn .icon-exit {
+            display: none;
+        }
+
+        /* Toggle icons when fullscreen active */
+        :fullscreen .fullscreen-btn .icon-enter {
+            display: none;
+        }
+
+        :fullscreen .fullscreen-btn .icon-exit {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -323,8 +399,8 @@
         </div>
 
         <div class="status-container">
-            <div id="dot" class="status-dot"></div>
-            <span id="status"></span>
+            <div id="dot" class="status-dot online"></div>
+            <span id="status">System Ready</span>
         </div>
     </div>
 
@@ -340,12 +416,54 @@
         </div>
     </div>
 
+    <!-- Floating Fullscreen Toggle Button -->
+    <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Toggle Fullscreen">
+        <!-- Expand Brackets Icon -->
+        <svg class="icon-enter" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        </svg>
+        <!-- Restore / Minimize Icon -->
+        <svg class="icon-exit" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+        </svg>
+    </button>
+
     <script>
         const GITHUB_USER = "ZahidAsif";
         const REPO_NAME   = "agico";
 
         // EMBEDDED ENCRYPTED PAYLOAD
         const ENCRYPTED_DATA = {"salt":[94,138,116,195,165,236,41,90,211,230,251,53,38,45,115,214],"iv":[124,103,194,137,148,158,223,126,203,235,18,27],"ciphertext":[3,187,132,156,248,165,138,237,221,106,54,6,76,3,85,171,143,98,244,224,242,130,104,35,116,116,228,104,132,85,118,161,173,5,46,81,64,225,144,130,213,104,0,4,122,255,68,161,2,149,215,104,89,213,34,245]};
+
+        // Network Status Detector
+        function updateConnectionStatus() {
+            const dot = document.getElementById('dot');
+            const statusText = document.getElementById('status');
+
+            if (navigator.onLine) {
+                dot.className = 'status-dot online';
+                statusText.innerText = "System Ready";
+            } else {
+                dot.className = 'status-dot offline';
+                statusText.innerText = "Offline";
+            }
+        }
+
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+        updateConnectionStatus();
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
 
         function openPinModal() {
             const input = document.getElementById('pinInput');
@@ -364,17 +482,15 @@
             if (!pin) return;
 
             const status = document.getElementById('status');
-            const dot = document.getElementById('dot');
 
             status.innerText = "Authenticating...";
-            dot.classList.add('active');
 
             const decryptedToken = await decryptToken(pin);
 
             if (!decryptedToken) {
                 alert("Incorrect Security PIN, Sir.");
                 status.innerText = "Access Denied";
-                dot.classList.remove('active');
+                setTimeout(updateConnectionStatus, 3000);
                 return;
             }
 
@@ -405,7 +521,6 @@
 
         async function sendTrigger(token) {
             const status = document.getElementById('status');
-            const dot = document.getElementById('dot');
 
             status.innerText = "Initiating command...";
 
@@ -441,18 +556,15 @@
 
                 if (putRes.ok) {
                     status.innerText = "Upload Command Sent!";
-                    setTimeout(() => {
-                        status.innerText = "";
-                        dot.classList.remove('active');
-                    }, 3000);
+                    setTimeout(updateConnectionStatus, 3000);
                 } else {
                     const err = await putRes.json().catch(() => ({}));
                     status.innerText = `Error: ${err.message || 'Unauthorized'}`;
-                    dot.classList.remove('active');
+                    setTimeout(updateConnectionStatus, 3000);
                 }
             } catch (error) {
                 status.innerText = "Network Connection Error";
-                dot.classList.remove('active');
+                setTimeout(updateConnectionStatus, 3000);
             }
         }
     </script>
