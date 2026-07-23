@@ -561,7 +561,9 @@
             line.appendChild(document.createTextNode(` ${data.message}`));
             
             consoleBox.appendChild(line);
-            consoleBox.scrollTop = consoleBox.scrollHeight;
+            requestAnimationFrame(() => {
+                consoleBox.scrollTop = consoleBox.scrollHeight;
+            });
         }
 
         function clearConsole() {
@@ -617,13 +619,21 @@
         startLogStream();
 
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
-                });
+            const doc = document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.webkitRequestFullScreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) {
+                    requestFullScreen.call(docEl).catch(err => {
+                        console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                }
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
+                if (cancelFullScreen) {
+                    cancelFullScreen.call(doc);
                 }
             }
         }
@@ -689,6 +699,10 @@
             }
         }
 
+        function utf8ToBase64(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+        }
+
         async function sendTrigger(token) {
             const status = document.getElementById('status');
             const dot = document.getElementById('dot');
@@ -720,7 +734,7 @@
                     },
                     body: JSON.stringify({
                         message: "Remote trigger from web interface",
-                        content: btoa(Date.now().toString()),
+                        content: utf8ToBase64(Date.now().toString()),
                         sha: sha
                     })
                 });
