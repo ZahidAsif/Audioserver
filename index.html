@@ -230,8 +230,7 @@
         const REPO_NAME   = "agico";
 
         // EMBEDDED ENCRYPTED PAYLOAD
-        const ENCRYPTED_DATA = {"salt":[94,138,116,195,165,236,41,90,211,230,251,53,38,45,115,214],"iv":[124,103,194,137,148,158,223,126,203,235,18,27],"ciphertext":[3,187,132,156,248,165,138,237,221,106,54,6,76,3,85,171,143,98,244,224,242,130,104,35,116,116,228,104,132,85,118,161,173,5,46,81,64,225,144,130,213,104,0,4,122,255,68,161,2,149,215,104,89,213,34,245]};
-
+        const ENCRYPTED_DATA = {"salt":[205,48,145,115,87,14,178,6,253,182,122,4,33,88,229,215],"iv":[78,160,38,173,205,123,62,100,92,222,123,158],"ciphertext":[61,70,203,32,253,165,83,213,178,178,187,244,212,125,243,139,214,139,85,73,197,85,108,101,217,189,51,230,176,167,105,252,243,37,180,58,125,137,66,255,115,200,39,100,105,110,247,27,231,68,21,38,235,231,41,207]}
         // Decrypts the token in memory using PBKDF2 + AES-GCM
         async function decryptToken(pin) {
             try {
@@ -259,7 +258,7 @@
             const status = document.getElementById('status');
             const dot = document.getElementById('dot');
 
-            const pin = prompt("Sir, please enter your Master Security PIN:");
+            const pin = prompt("Enter PIN:");
             if (!pin) return;
 
             status.innerText = "Authenticating...";
@@ -268,7 +267,7 @@
             const decryptedToken = await decryptToken(pin.trim());
 
             if (!decryptedToken) {
-                alert("Incorrect Security PIN, Sir.");
+                alert("Incorrect PIN");
                 status.innerText = "Access Denied";
                 dot.classList.remove('active');
                 return;
