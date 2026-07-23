@@ -85,6 +85,18 @@
             font-weight: 600;
             letter-spacing: -0.5px;
             color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Logo scaled to match the font height of 'A' */
+        .header-logo {
+            height: 1em;
+            width: auto;
+            display: inline-block;
+            object-fit: contain;
         }
 
         .header p {
@@ -289,7 +301,10 @@
 
     <div class="glass-card">
         <div class="header">
-            <h1>AGICO</h1>
+            <h1>
+                <img src="agicologo.png" alt="AGICO Logo" class="header-logo" />
+                AGICO
+            </h1>
             <p>Document Digitization Wing</p>
         </div>
 
