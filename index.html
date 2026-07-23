@@ -112,7 +112,7 @@
             perspective: 200px;
         }
 
-        /* Logo animated: Jumps up, spins 360° along its vertical Y-axis, squashes on landing */
+        /* Logo animated: Low jump, 2 fast 360° spins (720° total), smooth slow sit-down */
         .header-logo {
             height: 1.1em;
             width: auto;
@@ -120,33 +120,36 @@
             object-fit: contain;
             transform-style: preserve-3d;
             
-            /* Periodic 5-Second Vertical-Axis Jump-Flip Animation */
-            animation: verticalJumpFlip 5s ease-in-out infinite;
+            animation: gentleDoubleSpin 5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
         }
 
-        @keyframes verticalJumpFlip {
-            0%, 80%, 100% {
+        @keyframes gentleDoubleSpin {
+            0%, 78%, 100% {
                 transform: translateY(0) rotateY(0deg) scale(1, 1);
             }
-            82% {
-                /* Initial compression before spring-up */
-                transform: translateY(1px) rotateY(0deg) scale(1.15, 0.85);
+            80% {
+                /* Subtle compression prep */
+                transform: translateY(1px) rotateY(0deg) scale(1.08, 0.92);
+            }
+            84% {
+                /* Quick rise with double spin in progress */
+                transform: translateY(-8px) rotateY(360deg) scale(0.95, 1.05);
             }
             88% {
-                /* Apex of jump: midway through double flip (180 deg) */
-                transform: translateY(-16px) rotateY(180deg) scale(0.9, 1.1);
+                /* Apex reached, completes second full turn (720 deg) */
+                transform: translateY(-8px) rotateY(720deg) scale(0.98, 1.02);
             }
             94% {
-                /* Touches down, completes full 360 deg spin */
-                transform: translateY(0) rotateY(360deg) scale(1, 1);
+                /* Slow, smooth touchdown back to base line */
+                transform: translateY(0) rotateY(720deg) scale(1, 1);
             }
             96% {
-                /* Squish impact on landing */
-                transform: translateY(2px) rotateY(360deg) scale(1.2, 0.8);
+                /* Gentle landing squish */
+                transform: translateY(1px) rotateY(720deg) scale(1.1, 0.9);
             }
             98% {
-                /* Slight rebound bounce */
-                transform: translateY(-2px) rotateY(360deg) scale(0.95, 1.05);
+                /* Soft restoration */
+                transform: translateY(0) rotateY(720deg) scale(1, 1);
             }
         }
 
@@ -487,21 +490,22 @@
 
         let isActionInProgress = false;
 
-        // Active GitHub Reachability Ping
+        // Reliable Reachability Ping (bypasses CORS/rate-limit blocks)
         async function verifyGitHubAccess() {
             if (!navigator.onLine) return false;
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 sec timeout
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
 
             try {
-                const res = await fetch(`https://api.github.com/zen?_=${Date.now()}`, {
-                    method: 'GET',
+                await fetch(`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/main/README.md?_=${Date.now()}`, {
+                    method: 'HEAD',
+                    mode: 'no-cors',
                     cache: 'no-store',
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
-                return res.ok;
+                return true;
             } catch (err) {
                 return false;
             }
