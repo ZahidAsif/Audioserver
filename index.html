@@ -119,10 +119,9 @@
             display: inline-block;
             object-fit: contain;
             transform-style: preserve-3d;
-            
-            animation: gentleDoubleSpin 5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+            animation: gentleDoubleSpin 10s cubic-bezier(0.25, 1, 0.5, 1) infinite;
         }
-
+        
         @keyframes gentleDoubleSpin {
             /* Idle rest state */
             0%, 78% {
@@ -133,23 +132,23 @@
                 transform: translateY(1px) rotateY(0deg) scale(1.08, 0.92);
             }
             84% {
-                /* Rapid rise & mid-air rotation */
+                /* Gentle rise & first full rotation */
                 transform: translateY(-8px) rotateY(360deg) scale(0.95, 1.05);
             }
             88% {
-                /* Apex reached, completes exactly two spins (720deg) */
+                /* Apex reached, completes second full rotation (720deg) */
                 transform: translateY(-8px) rotateY(720deg) scale(0.98, 1.02);
             }
             94% {
-                /* Slow, smooth touchdown back to baseline (holding 720deg) */
+                /* Slow, deliberate touchdown back to baseline */
                 transform: translateY(0) rotateY(720deg) scale(1, 1);
             }
             96% {
-                /* Gentle landing squish (holding 720deg) */
+                /* Gentle landing squish */
                 transform: translateY(1px) rotateY(720deg) scale(1.1, 0.9);
             }
             98%, 100% {
-                /* Soft restoration to rest position facing forward */
+                /* Soft restoration to rest position */
                 transform: translateY(0) rotateY(720deg) scale(1, 1);
             }
         }
